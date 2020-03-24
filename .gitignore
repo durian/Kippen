@@ -130,5 +130,6 @@ dmypy.json
 
 KIPPEN_TRAIN/
 KIPPEN_VAL/
+KIPPEN_TEST/
 latest_kippen4/
 *~
