@@ -18,6 +18,7 @@ import datetime
 parser = argparse.ArgumentParser()
 parser.add_argument( '-b', "--batch_size", type=int, default=28, help='Batch size' )
 parser.add_argument( '-e', "--epochs",     type=int, default=10, help='Epochs' )
+parser.add_argument( '-p', "--show_plots", action='store_true', default=False, help='Show plots' )
 args = parser.parse_args()
 
 img_gen = tf.keras.preprocessing.image.ImageDataGenerator(rescale=1./255,
@@ -41,21 +42,22 @@ print( "train_generator" )
 print( "images.shape", images.shape )
 print( "Images:", train_generator.samples )
 
-cnt = 1
-for a, b in train_generator:
-  print( "a.shape", a.shape )
-  print( "b.shape", b.shape )
-  for i, p in enumerate(a[0:9]): # plot max 9
-    plt.subplot(330 + 1 + i)
-    print( p.shape, b[i] )
-    plt.imshow( p[:, :, :] ) # rgb
-    #plt.imshow( a[0, :, :, 0], cmap='gray' )
-    #plt.imshow( a[1, :, :, 0], cmap='gray' )
-  plt.show(block=False)
-  cnt -= 1
-  if cnt <= 0:
-    break
-plt.pause(0.1) # actually shows them
+if args.show_plots:
+  cnt = 1
+  for a, b in train_generator:
+    print( "a.shape", a.shape )
+    print( "b.shape", b.shape )
+    for i, p in enumerate(a[0:9]): # plot max 9
+      plt.subplot(330 + 1 + i)
+      print( p.shape, b[i] )
+      plt.imshow( p[:, :, :] ) # rgb
+      #plt.imshow( a[0, :, :, 0], cmap='gray' )
+      #plt.imshow( a[1, :, :, 0], cmap='gray' )
+    plt.show(block=False)
+    cnt -= 1
+    if cnt <= 0:
+      break
+  plt.pause(0.1) # actually shows them
 
 # insipred by https://github.com/calmisential/TensorFlow2.0_Image_Classification/blob/master/models/vgg19.py
 model = tf.keras.Sequential()
@@ -180,6 +182,7 @@ history = model.fit( train_generator,
 model.save( config.save_dir )
 history_df = pd.DataFrame( history.history )
 print( history_df )
-history_df.plot(y=["loss", "accuracy", "mse"])
-plt.show()
+if args.show_plots:
+  history_df.plot(y=["loss", "accuracy", "mse"])
+  plt.show()
 
