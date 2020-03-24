@@ -16,7 +16,8 @@ import datetime
 #       -dF /a/webcams/kipcam1/out_img20200310*
 
 parser = argparse.ArgumentParser()
-parser.add_argument( '-e', "--epochs", type=int, default=10, help='Epochs' )
+parser.add_argument( '-b', "--batch_size", type=int, default=28, help='Batch size' )
+parser.add_argument( '-e', "--epochs",     type=int, default=10, help='Epochs' )
 args = parser.parse_args()
 
 img_gen = tf.keras.preprocessing.image.ImageDataGenerator(rescale=1./255,
@@ -31,7 +32,7 @@ img_gen = tf.keras.preprocessing.image.ImageDataGenerator(rescale=1./255,
 train_generator = img_gen.flow_from_directory(
   config.train_dir,
   target_size=( config.image_height, config.image_width ),
-  batch_size=48,
+  batch_size=args.batch_size,
   class_mode='categorical',
   subset="training")
 
@@ -145,8 +146,8 @@ class MyCustomCallback( tf.keras.callbacks.Callback ):
   #    print('Predicting: batch {} ends at {}'.format(batch, datetime.datetime.now().time()))
   
   def on_epoch_end(self, epoch, logs={}):
-    if epoch % 10 == 0:
-      print( 'epoch {:4d} Loss: {:.4f}'.format(epoch, logs["loss"]) )
+    if True or epoch % 10 == 0:
+      print( '\n  epoch {:4d} Loss: {:.4f}'.format(epoch, logs["loss"]) )
 
   def on_epoch_start(self, epoch, logs=None):
     if epoch % 10 == 0:
