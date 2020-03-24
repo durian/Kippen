@@ -5,3 +5,4 @@ channels     =  3
 num_classes  =  2
 save_dir     = "./latest_kippen4"
 csv_log_file = "./kippen4_training.log"
+chkpt_dir    = "./chkpt_kippen4"

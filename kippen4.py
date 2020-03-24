@@ -3,6 +3,7 @@
 # -------------------------------------------------------------
 #
 import sys
+import os
 import tensorflow as tf
 import PIL
 import matplotlib.pyplot as plt
@@ -15,6 +16,8 @@ import datetime
 # use feh  to sort
 #   feh --action1 "echo %f;cp %f KIPPEN_TRAIN/NONE/" --action2 "echo %f;cp %f KIPPEN_TRAIN/PRESENT/"
 #       -dF /a/webcams/kipcam1/out_img20200310*
+#
+# CUDA_VISIBLE_DEVICES="" python kippen4.py
 
 parser = argparse.ArgumentParser()
 parser.add_argument( '-b', "--batch_size", type=int, default=28, help='Batch size' )
@@ -59,8 +62,6 @@ images, labels = next(validation_generator)
 print( "validation_generator" )
 print( "images.shape", images.shape )
 print( "Images:", validation_generator.samples )
-
-sys.exit(1)
 
 if args.show_plots:
   cnt = 1
@@ -170,10 +171,10 @@ class MyCustomCallback( tf.keras.callbacks.Callback ):
   def on_epoch_end(self, epoch, logs={}):
     if epoch % 10 == 0:
       print( '\n  epoch {:4d} Loss: {:.4f}'.format(epoch, logs["loss"]) )
-      vals = model.evaluate( validation_generator )
-      print( vals )
-      acc = vals[1] # loss, acc, mse (see compile(...)
-      print("The accuracy on validation set is: {:6.3f}%".format(acc*100))
+      #vals = model.evaluate( validation_generator )
+      #print( vals )
+      #acc = vals[1] # loss, acc, mse (see compile(...)
+      #print("The accuracy on validation set is: {:6.3f}%".format(acc*100))
 
 
   def on_epoch_start(self, epoch, logs=None):
@@ -185,6 +186,19 @@ csv_logger = tf.keras.callbacks.CSVLogger( config.csv_log_file )
 
 # TN FN etc
 # https://stackoverflow.com/questions/47899463/how-to-extract-false-positive-false-negative-from-a-confusion-matrix-of-multicl
+
+output_dir = config.chkpt_dir
+if not os.path.exists(output_dir):
+  os.makedirs(output_dir)
+filepath = output_dir+"/model-{epoch:04d}-{accuracy:.4f}.hdf5"
+checkpoint_callback = tf.keras.callbacks.ModelCheckpoint(
+  filepath,
+  monitor='accuracy',
+  verbose=1,
+  save_best_only=True,
+  save_weights_only=False,
+  save_frequency=10
+)
 
 model.compile(optimizer='adam',
               loss='categorical_crossentropy',
@@ -203,6 +217,7 @@ history = model.fit( train_generator,
                      #validation_data=next(validation_generator),
                      callbacks=[
                        MyCustomCallback(),
+                       checkpoint_callback,
                        csv_logger
                      ])
 model.reset_metrics()
