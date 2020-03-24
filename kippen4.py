@@ -153,7 +153,7 @@ class MyCustomCallback( tf.keras.callbacks.Callback ):
       print( '-> epoch {}.'.format(epoch) )
 
 # Save all loss, accuracy, etc values to a CSV file
-csv_logger = tf.keras.callbacks.CSVLogger( condif.csv_log_file )
+csv_logger = tf.keras.callbacks.CSVLogger( config.csv_log_file )
 
 # TN FN etc
 # https://stackoverflow.com/questions/47899463/how-to-extract-false-positive-false-negative-from-a-confusion-matrix-of-multicl
