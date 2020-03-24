@@ -2,6 +2,7 @@
 # Train webcam images to detect chickens/no-chickens
 # -------------------------------------------------------------
 #
+import sys
 import tensorflow as tf
 import PIL
 import matplotlib.pyplot as plt
@@ -37,10 +38,29 @@ train_generator = img_gen.flow_from_directory(
   class_mode='categorical',
   subset="training")
 
+# Validation
+validation_datagen = tf.keras.preprocessing.image.ImageDataGenerator(
+  rescale=1.0 / 255.0
+)
+validation_generator = validation_datagen.flow_from_directory("KIPPEN_VAL",
+                                                  target_size=( config.image_height, config.image_width ),
+                                                  batch_size=80,
+                                                  shuffle=False,
+                                                  class_mode="categorical"
+)
+
+
 images, labels = next( train_generator )
 print( "train_generator" )
 print( "images.shape", images.shape )
 print( "Images:", train_generator.samples )
+
+images, labels = next(validation_generator)
+print( "validation_generator" )
+print( "images.shape", images.shape )
+print( "Images:", validation_generator.samples )
+
+sys.exit(1)
 
 if args.show_plots:
   cnt = 1
@@ -150,6 +170,11 @@ class MyCustomCallback( tf.keras.callbacks.Callback ):
   def on_epoch_end(self, epoch, logs={}):
     if epoch % 10 == 0:
       print( '\n  epoch {:4d} Loss: {:.4f}'.format(epoch, logs["loss"]) )
+      vals = model.evaluate( validation_generator )
+      print( vals )
+      acc = vals[1] # loss, acc, mse (see compile(...)
+      print("The accuracy on validation set is: {:6.3f}%".format(acc*100))
+
 
   def on_epoch_start(self, epoch, logs=None):
     if epoch % 10 == 0:
@@ -175,10 +200,12 @@ print( model.summary() )
 history = model.fit( train_generator,
                      epochs=args.epochs,
                      verbose=1,
+                     #validation_data=next(validation_generator),
                      callbacks=[
                        MyCustomCallback(),
                        csv_logger
                      ])
+model.reset_metrics()
 model.save( config.save_dir )
 history_df = pd.DataFrame( history.history )
 print( history_df )
