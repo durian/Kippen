@@ -41,7 +41,7 @@ print( "train_generator" )
 print( "images.shape", images.shape )
 print( "Images:", train_generator.samples )
 
-cnt = 2
+cnt = 1
 for a, b in train_generator:
   print( "a.shape", a.shape )
   print( "b.shape", b.shape )
@@ -146,7 +146,7 @@ class MyCustomCallback( tf.keras.callbacks.Callback ):
   #    print('Predicting: batch {} ends at {}'.format(batch, datetime.datetime.now().time()))
   
   def on_epoch_end(self, epoch, logs={}):
-    if True or epoch % 10 == 0:
+    if epoch % 10 == 0:
       print( '\n  epoch {:4d} Loss: {:.4f}'.format(epoch, logs["loss"]) )
 
   def on_epoch_start(self, epoch, logs=None):
