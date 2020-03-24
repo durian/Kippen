@@ -1,3 +1,7 @@
+# -------------------------------------------------------------
+# Train webcam images to detect chickens/no-chickens
+# -------------------------------------------------------------
+#
 import tensorflow as tf
 import PIL
 import matplotlib.pyplot as plt
@@ -23,26 +27,20 @@ img_gen = tf.keras.preprocessing.image.ImageDataGenerator(rescale=1./255,
                                                           #featurewise_center=True,
                                                           height_shift_range=0.2
 )
-#images, labels = next(img_gen.flow_from_directory( config.train_dir ))
-#print( labels )
-#print(images.dtype, images.shape)
-#print(labels.dtype, labels.shape)
 
 train_generator = img_gen.flow_from_directory(
   config.train_dir,
   target_size=( config.image_height, config.image_width ),
-  #target_size=(128, 128),
   batch_size=48,
-  #class_mode='binary',
   class_mode='categorical',
   subset="training")
-#img_gen.fit( train_generator )
 
 images, labels = next( train_generator )
 print( "train_generator" )
 print( "images.shape", images.shape )
+print( "Images:", train_generator.samples )
 
-cnt = 1
+cnt = 2
 for a, b in train_generator:
   print( "a.shape", a.shape )
   print( "b.shape", b.shape )
@@ -58,11 +56,7 @@ for a, b in train_generator:
     break
 plt.pause(0.1) # actually shows them
 
-#input_batch = next( train_generator ) 
-#print( input_batch[0].shape )
-#print( input_batch[1] )
-
-# https://github.com/calmisential/TensorFlow2.0_Image_Classification/blob/master/models/vgg19.py
+# insipred by https://github.com/calmisential/TensorFlow2.0_Image_Classification/blob/master/models/vgg19.py
 model = tf.keras.Sequential()
 # 1
 model.add(tf.keras.layers.Conv2D(filters=64,
@@ -127,6 +121,7 @@ model.add(tf.keras.layers.Dense(units=128,
 model.add(tf.keras.layers.Dense(units=config.num_classes,
                                 activation=tf.keras.activations.softmax))
 
+# Custom accuracy class
 class myAccuracy(tf.keras.metrics.Accuracy):
   def update_state(self, y_true, y_pred, sample_weight=None):
     y_true = tf.argmax(y_true,1)
@@ -157,7 +152,8 @@ class MyCustomCallback( tf.keras.callbacks.Callback ):
     if epoch % 10 == 0:
       print( '-> epoch {}.'.format(epoch) )
 
-csv_logger = tf.keras.callbacks.CSVLogger('kippen4_training.log')
+# Save all loss, accuracy, etc values to a CSV file
+csv_logger = tf.keras.callbacks.CSVLogger( condif.csv_log_file )
 
 # TN FN etc
 # https://stackoverflow.com/questions/47899463/how-to-extract-false-positive-false-negative-from-a-confusion-matrix-of-multicl
@@ -171,19 +167,18 @@ model.compile(optimizer='adam',
                 #'TruePositives', 'TrueNegatives', 'FalsePositives', 'FalseNegatives',
                 #"mae"
               ])
-
 print( model.summary() )
 
 history = model.fit( train_generator,
                      epochs=args.epochs,
                      verbose=1,
-                     callbacks=[MyCustomCallback(), csv_logger]
-)
+                     callbacks=[
+                       MyCustomCallback(),
+                       csv_logger
+                     ])
 model.save( config.save_dir )
 history_df = pd.DataFrame( history.history )
 print( history_df )
-history_df.to_csv( "history.csv" )
-
 history_df.plot(y=["loss", "accuracy", "mse"])
 plt.show()
 
