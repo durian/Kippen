@@ -129,3 +129,6 @@ dmypy.json
 .pyre/
 
 KIPPEN_TRAIN/
+KIPPEN_VAL/
+latest_kippen4/
+*~
