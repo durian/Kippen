@@ -95,8 +95,8 @@ model.add(tf.keras.layers.Conv2D(filters=64,
 model.add(tf.keras.layers.MaxPool2D(pool_size=(2, 2),
                                     strides=2,
                                     padding='same'))
-## model.add(Dropout(0.2))
-## model.add(BatchNormalization())
+model.add(tf.keras.layers.Dropout(0.2))
+model.add(tf.keras.layers.BatchNormalization())
 # 2
 model.add(tf.keras.layers.Conv2D(filters=128,
                                  kernel_size=(3, 3),
@@ -111,8 +111,10 @@ model.add(tf.keras.layers.Conv2D(filters=128,
 model.add(tf.keras.layers.MaxPool2D(pool_size=(2, 2),
                                     strides=2,
                                     padding='same'))
+model.add(tf.keras.layers.Dropout(0.2))
+model.add(tf.keras.layers.BatchNormalization())
 # 3
-if False:
+if True:
   model.add(tf.keras.layers.Conv2D(filters=256,
                                    kernel_size=(3, 3),
                                    strides=1,
@@ -136,11 +138,68 @@ if False:
   model.add(tf.keras.layers.MaxPool2D(pool_size=(2, 2),
                                       strides=2,
                                       padding='same'))
-#    
+  model.add(tf.keras.layers.Dropout(0.2))
+  model.add(tf.keras.layers.BatchNormalization())
+#
+# 4
+model.add(tf.keras.layers.Conv2D(filters=512,
+                                 kernel_size=(3, 3),
+                                 strides=1,
+                                 padding='same',
+                                 activation=tf.keras.activations.relu))
+model.add(tf.keras.layers.Conv2D(filters=512,
+                                 kernel_size=(3, 3),
+                                 strides=1,
+                                 padding='same',
+                                 activation=tf.keras.activations.relu))
+model.add(tf.keras.layers.Conv2D(filters=512,
+                                 kernel_size=(3, 3),
+                                 strides=1,
+                                 padding='same',
+                                 activation=tf.keras.activations.relu))
+model.add(tf.keras.layers.Conv2D(filters=512,
+                                 kernel_size=(3, 3),
+                                 strides=1,
+                                 padding='same',
+                                 activation=tf.keras.activations.relu))
+model.add(tf.keras.layers.MaxPool2D(pool_size=(2, 2),
+                                    strides=2,
+                                    padding='same'))
+model.add(tf.keras.layers.Dropout(0.2))
+model.add(tf.keras.layers.BatchNormalization())
+
+# 5
+model.add(tf.keras.layers.Conv2D(filters=512,
+                                 kernel_size=(3, 3),
+                                 strides=1,
+                                 padding='same',
+                                 activation=tf.keras.activations.relu))
+model.add(tf.keras.layers.Conv2D(filters=512,
+                                 kernel_size=(3, 3),
+                                 strides=1,
+                                 padding='same',
+                                 activation=tf.keras.activations.relu))
+model.add(tf.keras.layers.Conv2D(filters=512,
+                                 kernel_size=(3, 3),
+                                 strides=1,
+                                 padding='same',
+                                 activation=tf.keras.activations.relu))
+model.add(tf.keras.layers.Conv2D(filters=512,
+                                 kernel_size=(3, 3),
+                                 strides=1,
+                                 padding='same',
+                                 activation=tf.keras.activations.relu))
+model.add(tf.keras.layers.MaxPool2D(pool_size=(2, 2),
+                                    strides=2,
+                                    padding='same'))
+model.add(tf.keras.layers.Dropout(0.2))
+model.add(tf.keras.layers.BatchNormalization())
+
+# Dense
 model.add(tf.keras.layers.Flatten())
-model.add(tf.keras.layers.Dense(units=128,
+model.add(tf.keras.layers.Dense(units=4096, # number we get from lprevious layer
                                 activation=tf.keras.activations.relu))
-model.add(tf.keras.layers.Dense(units=128,
+model.add(tf.keras.layers.Dense(units=2048,
                                 activation=tf.keras.activations.relu))
 model.add(tf.keras.layers.Dense(units=config.num_classes,
                                 activation=tf.keras.activations.softmax))
@@ -185,6 +244,12 @@ class MyCustomCallback( tf.keras.callbacks.Callback ):
 # Save all loss, accuracy, etc values to a CSV file
 csv_logger = tf.keras.callbacks.CSVLogger( config.csv_log_file )
 
+tensorboard = tf.keras.callbacks.TensorBoard(log_dir=config.tboard_dir,
+                                             histogram_freq=1,
+                                             update_freq="epoch",
+                                             write_graph=True,
+                                             write_images=True)
+
 # TN FN etc
 # https://stackoverflow.com/questions/47899463/how-to-extract-false-positive-false-negative-from-a-confusion-matrix-of-multicl
 
@@ -201,11 +266,12 @@ checkpoint_callback = tf.keras.callbacks.ModelCheckpoint(
   save_frequency=10
 )
 
+#sgd = SGD(lr=0.001, momentum=0.9, decay=decay, nesterov=False)
 model.compile(optimizer='adam',
               loss='categorical_crossentropy',
               metrics=[
                 'accuracy',
-                "mse",
+                #"mse",
                 #myAccuracy(),
                 #'TruePositives', 'TrueNegatives', 'FalsePositives', 'FalseNegatives',
                 #"mae"
@@ -220,7 +286,8 @@ history = model.fit( train_generator,
                      callbacks=[
                        MyCustomCallback(),
                        checkpoint_callback,
-                       csv_logger
+                       csv_logger,
+                       tensorboard,
                      ])
 model.reset_metrics()
 model.save( config.save_dir )

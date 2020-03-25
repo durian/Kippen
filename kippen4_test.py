@@ -14,8 +14,8 @@ test_generator = test_datagen.flow_from_directory("KIPPEN_TEST",
 
 
 # Load the model
-#new_model = tf.keras.models.load_model( config.save_dir )
-new_model = tf.keras.models.load_model( "chkpt_kippen4/model-0830-1.0000.hdf5" )
+new_model = tf.keras.models.load_model( config.save_dir )
+#new_model = tf.keras.models.load_model( "chkpt_kippen4/model-0830-1.0000.hdf5" )
 
 # Get the accuracy on the test set
 vals = new_model.evaluate( test_generator ) # three because in model.compile(...)
