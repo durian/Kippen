@@ -20,9 +20,10 @@ import datetime
 # CUDA_VISIBLE_DEVICES="" python kippen4.py
 
 parser = argparse.ArgumentParser()
-parser.add_argument( '-b', "--batch_size", type=int, default=28, help='Batch size' )
-parser.add_argument( '-e', "--epochs",     type=int, default=10, help='Epochs' )
-parser.add_argument( '-p', "--show_plots", action='store_true', default=False, help='Show plots' )
+parser.add_argument( '-b', "--batch_size",   type=int, default=28, help='Batch size' )
+parser.add_argument( '-e', "--epochs",       type=int, default=10, help='Epochs' )
+parser.add_argument( '-i', "--initial_epoch",type=int, default=0, help='OInitial epoch' ) # TODO Implement!
+parser.add_argument( '-p', "--show_plots",   action='store_true', default=False, help='Show plots' )
 args = parser.parse_args()
 
 img_gen = tf.keras.preprocessing.image.ImageDataGenerator(rescale=1./255,
@@ -171,15 +172,15 @@ class MyCustomCallback( tf.keras.callbacks.Callback ):
   def on_epoch_end(self, epoch, logs={}):
     if epoch % 10 == 0:
       print( '\n  epoch {:4d} Loss: {:.4f}'.format(epoch, logs["loss"]) )
+      model.save( config.save_dir )
       #vals = model.evaluate( validation_generator )
       #print( vals )
       #acc = vals[1] # loss, acc, mse (see compile(...)
       #print("The accuracy on validation set is: {:6.3f}%".format(acc*100))
 
-
-  def on_epoch_start(self, epoch, logs=None):
-    if epoch % 10 == 0:
-      print( '-> epoch {}.'.format(epoch) )
+  #def on_epoch_start(self, epoch, logs=None):
+  #  if epoch % 10 == 0:
+  #    print( '-> epoch {}.'.format(epoch) )
 
 # Save all loss, accuracy, etc values to a CSV file
 csv_logger = tf.keras.callbacks.CSVLogger( config.csv_log_file )
@@ -214,6 +215,7 @@ print( model.summary() )
 history = model.fit( train_generator,
                      epochs=args.epochs,
                      verbose=1,
+                     initial_epoch=args.initial_epoch,
                      #validation_data=next(validation_generator),
                      callbacks=[
                        MyCustomCallback(),
