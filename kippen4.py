@@ -26,13 +26,15 @@ parser.add_argument( '-i', "--initial_epoch",type=int, default=0, help='Initial 
 parser.add_argument( '-p', "--show_plots",   action='store_true', default=False, help='Show plots' )
 args = parser.parse_args()
 
+# Augmentation is maybe not necessary... we have a static background
+# on which we want to see chickens.
 img_gen = tf.keras.preprocessing.image.ImageDataGenerator(rescale=1./255,
-                                                          rotation_range=20,
+                                                          ##rotation_range=20,
                                                           validation_split=0.4,
-                                                          horizontal_flip=True,
-                                                          width_shift_range=0.2,
+                                                          ##horizontal_flip=True,
+                                                          ##width_shift_range=0.2,
                                                           #featurewise_center=True,
-                                                          height_shift_range=0.2
+                                                          ##height_shift_range=0.2
 )
 
 train_generator = img_gen.flow_from_directory(
@@ -93,6 +95,8 @@ model.add(tf.keras.layers.Conv2D(filters=64,
 model.add(tf.keras.layers.MaxPool2D(pool_size=(2, 2),
                                     strides=2,
                                     padding='same'))
+## model.add(Dropout(0.2))
+## model.add(BatchNormalization())
 # 2
 model.add(tf.keras.layers.Conv2D(filters=128,
                                  kernel_size=(3, 3),
@@ -166,8 +170,9 @@ class MyCustomCallback( tf.keras.callbacks.Callback ):
   
   def on_epoch_end(self, epoch, logs={}):
     if epoch % 10 == 0:
-      print( '\n  epoch {:4d} Loss: {:.4f}'.format(epoch, logs["loss"]) )
-      model.save( config.save_dir )
+      pass
+      #print( '\n  epoch {:4d} Loss: {:.4f}'.format(epoch, logs["loss"]) )
+      #model.save( config.save_dir )
       #vals = model.evaluate( validation_generator )
       #print( vals )
       #acc = vals[1] # loss, acc, mse (see compile(...)
@@ -190,7 +195,7 @@ filepath = output_dir+"/model-{epoch:04d}-{accuracy:.4f}.hdf5"
 checkpoint_callback = tf.keras.callbacks.ModelCheckpoint(
   filepath,
   monitor='accuracy',
-  verbose=1,
+  verbose=0,
   save_best_only=True,
   save_weights_only=False,
   save_frequency=10
@@ -222,6 +227,6 @@ model.save( config.save_dir )
 history_df = pd.DataFrame( history.history )
 print( history_df )
 if args.show_plots:
-  history_df.plot(y=["loss", "accuracy", "mse"])
+  history_df.plot(y=["loss", "accuracy", "val_loss", "val_accuracy"])
   plt.show()
 
