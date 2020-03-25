@@ -22,7 +22,7 @@ import datetime
 parser = argparse.ArgumentParser()
 parser.add_argument( '-b', "--batch_size",   type=int, default=28, help='Batch size' )
 parser.add_argument( '-e', "--epochs",       type=int, default=10, help='Epochs' )
-parser.add_argument( '-i', "--initial_epoch",type=int, default=0, help='OInitial epoch' ) # TODO Implement!
+parser.add_argument( '-i', "--initial_epoch",type=int, default=0, help='Initial epoch' ) # TODO Implement!
 parser.add_argument( '-p', "--show_plots",   action='store_true', default=False, help='Show plots' )
 args = parser.parse_args()
 
@@ -41,17 +41,12 @@ train_generator = img_gen.flow_from_directory(
   batch_size=args.batch_size,
   class_mode='categorical',
   subset="training")
-
-# Validation
-validation_datagen = tf.keras.preprocessing.image.ImageDataGenerator(
-  rescale=1.0 / 255.0
-)
-validation_generator = validation_datagen.flow_from_directory("KIPPEN_VAL",
-                                                  target_size=( config.image_height, config.image_width ),
-                                                  batch_size=80,
-                                                  shuffle=False,
-                                                  class_mode="categorical"
-)
+validation_generator = img_gen.flow_from_directory(
+  config.train_dir,
+  target_size=( config.image_height, config.image_width ),
+  batch_size=args.batch_size,
+  class_mode='categorical',
+  subset="validation")
 
 
 images, labels = next( train_generator )
@@ -62,7 +57,7 @@ print( "Images:", train_generator.samples )
 images, labels = next(validation_generator)
 print( "validation_generator" )
 print( "images.shape", images.shape )
-print( "Images:", validation_generator.samples )
+print( "Images:", validation_generator.samples )#.filenames )
 
 if args.show_plots:
   cnt = 1
@@ -216,7 +211,7 @@ history = model.fit( train_generator,
                      epochs=args.epochs,
                      verbose=1,
                      initial_epoch=args.initial_epoch,
-                     #validation_data=next(validation_generator),
+                     validation_data=validation_generator,
                      callbacks=[
                        MyCustomCallback(),
                        checkpoint_callback,
