@@ -228,6 +228,8 @@ class MyCustomCallback( tf.keras.callbacks.Callback ):
   #    print('Predicting: batch {} ends at {}'.format(batch, datetime.datetime.now().time()))
   
   def on_epoch_end(self, epoch, logs={}):
+    #if args.show_plots:
+    #  plt.pause(0.1) # small update, but puts in foreground, grmbl
     if epoch % 10 == 0:
       pass
       #print( '\n  epoch {:4d} Loss: {:.4f}'.format(epoch, logs["loss"]) )
@@ -245,7 +247,7 @@ class MyCustomCallback( tf.keras.callbacks.Callback ):
 csv_logger = tf.keras.callbacks.CSVLogger( config.csv_log_file )
 
 tensorboard = tf.keras.callbacks.TensorBoard(log_dir=config.tboard_dir,
-                                             histogram_freq=1,
+                                             histogram_freq=10,
                                              update_freq="epoch",
                                              write_graph=True,
                                              write_images=True)
