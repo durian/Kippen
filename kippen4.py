@@ -11,6 +11,7 @@ import pandas as pd
 import kippen4config as config
 import argparse
 import datetime
+import numpy as np
 
 # Train on empty / present from KIPPEN_TRAIN
 # use feh  to sort
@@ -70,21 +71,26 @@ print( "validation_generator" )
 print( "images.shape", images.shape )
 print( "Images:", validation_generator.samples )#.filenames )
 
+
+cnt = 1
+for a, b in train_generator:
+  print( "a.shape", a.shape )
+  print( "b.shape", b.shape )
+  for i, p in enumerate(a[0:9]): # plot max 9
+    ax  = plt.subplot(330 + 1 + i)
+    cls = np.argmax(b[i])
+    print( p.shape, b[i], cls )
+    plt.imshow( p[:, :, :] ) # rgb
+    ax.set_xlabel( str(cls), c='r' )
+    #plt.imshow( a[0, :, :, 0], cmap='gray' )
+    #plt.imshow( a[1, :, :, 0], cmap='gray' )
+  plt.tight_layout()
+  plt.savefig( config.PREFIX+"train.png" )
+  cnt -= 1
+  if cnt <= 0:
+    break
 if args.show_plots:
-  cnt = 1
-  for a, b in train_generator:
-    print( "a.shape", a.shape )
-    print( "b.shape", b.shape )
-    for i, p in enumerate(a[0:9]): # plot max 9
-      plt.subplot(330 + 1 + i)
-      print( p.shape, b[i] )
-      plt.imshow( p[:, :, :] ) # rgb
-      #plt.imshow( a[0, :, :, 0], cmap='gray' )
-      #plt.imshow( a[1, :, :, 0], cmap='gray' )
-    plt.show(block=False)
-    cnt -= 1
-    if cnt <= 0:
-      break
+  plt.show(block=False)
   plt.pause(0.1) # actually shows them
 
 # insipred by https://github.com/calmisential/TensorFlow2.0_Image_Classification/blob/master/models/vgg19.py
@@ -256,10 +262,10 @@ class MyCustomCallback( tf.keras.callbacks.Callback ):
 csv_logger = tf.keras.callbacks.CSVLogger( config.csv_log_file )
 
 tensorboard = tf.keras.callbacks.TensorBoard(log_dir=config.tboard_dir,
-                                             histogram_freq=10,
+                                             histogram_freq=0,
                                              update_freq="epoch",
-                                             write_graph=True,
-                                             write_images=True)
+                                             write_graph=False,
+                                             write_images=False)
 
 # TN FN etc
 # https://stackoverflow.com/questions/47899463/how-to-extract-false-positive-false-negative-from-a-confusion-matrix-of-multicl
