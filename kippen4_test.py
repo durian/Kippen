@@ -7,7 +7,7 @@ import sys
 test_datagen = tf.keras.preprocessing.image.ImageDataGenerator(
     rescale=1.0 / 255.0
 )
-test_generator = test_datagen.flow_from_directory("KIPPEN_TEST",
+test_generator = test_datagen.flow_from_directory(config.test_dir,
                                                   target_size=(config.image_height, config.image_width),
                                                   batch_size=1, # how to get all in one batch?
                                                   shuffle=False,

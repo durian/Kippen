@@ -1,4 +1,5 @@
 train_dir    = "./KIPPEN_TRAIN"
+test_dir     = "./KIPPEN_TEST"
 image_height = 28*8
 image_width  = 28*8
 channels     =  3
