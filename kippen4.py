@@ -18,6 +18,15 @@ import datetime
 #       -dF /a/webcams/kipcam1/out_img20200310*
 #
 # CUDA_VISIBLE_DEVICES="" python kippen4.py
+#
+# Checkpoints/saving
+#   https://lambdalabs.com/blog/tensorflow-2-0-tutorial-03-saving-checkpoints/
+#
+# Small objects...
+#  https://medium.com/datadriveninvestor/small-objects-detection-problem-c5b430996162
+#  https://medium.com/@jonathan_hui/understanding-feature-pyramid-networks-for-object-detection-fpn-45b227b9106c
+#  https://github.com/DetectionTeamUCAS/FPN_Tensorflow
+#  https://www.paperswithcode.com/task/object-detection-in-aerial-images
 
 parser = argparse.ArgumentParser()
 parser.add_argument( '-b', "--batch_size",   type=int, default=28, help='Batch size' )
@@ -268,14 +277,14 @@ checkpoint_callback = tf.keras.callbacks.ModelCheckpoint(
   save_frequency=10
 )
 
-#sgd = SGD(lr=0.001, momentum=0.9, decay=decay, nesterov=False)
+#sgd = tf.keras.optimizers.SGD(lr=0.001, momentum=0.9, nesterov=False)
 model.compile(optimizer='adam',
               loss='categorical_crossentropy',
               metrics=[
                 'accuracy',
                 #"mse",
                 #myAccuracy(),
-                #'TruePositives', 'TrueNegatives', 'FalsePositives', 'FalseNegatives',
+                #'TruePositives', 'TrueNegatives', #'FalsePositives', 'FalseNegatives',
                 #"mae"
               ])
 print( model.summary() )
@@ -286,8 +295,8 @@ history = model.fit( train_generator,
                      initial_epoch=args.initial_epoch,
                      validation_data=validation_generator,
                      callbacks=[
-                       MyCustomCallback(),
-                       checkpoint_callback,
+                       #MyCustomCallback(),
+                       #checkpoint_callback,
                        csv_logger,
                        tensorboard,
                      ])
