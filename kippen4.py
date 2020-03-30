@@ -31,6 +31,7 @@ import numpy as np
 
 parser = argparse.ArgumentParser()
 parser.add_argument( '-b', "--batch_size",   type=int, default=28, help='Batch size' )
+parser.add_argument( '-d', "--display_only", action='store_true', default=False, help='Only show plots' )
 parser.add_argument( '-e', "--epochs",       type=int, default=10, help='Epochs' )
 parser.add_argument( '-i', "--initial_epoch",type=int, default=0, help='Initial epoch' ) # TODO Implement!
 parser.add_argument( '-p', "--show_plots",   action='store_true', default=False, help='Show plots' )
@@ -52,6 +53,7 @@ train_generator = img_gen.flow_from_directory(
   target_size=( config.image_height, config.image_width ),
   batch_size=args.batch_size,
   class_mode='categorical',
+  shuffle=True,
   subset="training")
 validation_generator = img_gen.flow_from_directory(
   config.train_dir,
@@ -71,16 +73,17 @@ print( "validation_generator" )
 print( "images.shape", images.shape )
 print( "Images:", validation_generator.samples )#.filenames )
 
-
-cnt = 1
+cnt = 1 #train_generator.samples // 9
+dim = 4
 for a, b in train_generator:
+  fig, axes = plt.subplots(nrows=dim, ncols=dim, figsize=(6,6))
   print( "a.shape", a.shape )
   print( "b.shape", b.shape )
-  for i, p in enumerate(a[0:9]): # plot max 9
-    ax  = plt.subplot(330 + 1 + i)
+  for i, p in enumerate(a[0:dim*dim]): # plot max dim^2
+    ax  = axes[i//dim,i%dim] #plt.subplot(330 + 1 + i)
     cls = np.argmax(b[i])
     print( p.shape, b[i], cls )
-    plt.imshow( p[:, :, :] ) # rgb
+    ax.imshow( p[:, :, :] ) # rgb 
     ax.set_xlabel( str(cls), c='r' )
     #plt.imshow( a[0, :, :, 0], cmap='gray' )
     #plt.imshow( a[1, :, :, 0], cmap='gray' )
@@ -89,6 +92,9 @@ for a, b in train_generator:
   cnt -= 1
   if cnt <= 0:
     break
+if args.display_only:
+  plt.show(block=True)
+  sys.exit(0)
 if args.show_plots:
   plt.show(block=False)
   plt.pause(0.1) # actually shows them

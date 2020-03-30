@@ -1,7 +1,7 @@
-train_dir    = "./KIPPEN_TEST"
+train_dir    = "./KIPPEN_TRAIN"
 test_dir     = "./KIPPEN_TEST"
-image_height = 28*8
-image_width  = 28*8
+image_height = 28*2
+image_width  = 28*2
 channels     =  3
 num_classes  =  2
 #
